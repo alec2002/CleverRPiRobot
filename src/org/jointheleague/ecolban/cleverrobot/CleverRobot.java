@@ -1,6 +1,7 @@
 package org.jointheleague.ecolban.cleverrobot;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.jointheleague.ecolban.rpirobot.IRobotAdapter;
 import org.jointheleague.ecolban.rpirobot.IRobotInterface;
@@ -12,6 +13,9 @@ public class CleverRobot extends IRobotAdapter implements Runnable {
 
 	private boolean running;
 	private final boolean debug = true; // Set to true to get debug messages.
+	private int d = 0;
+	private int rightWheelSpeed = 20;
+	private int leftWheelSpeed = 50;
 
 	public CleverRobot(IRobotInterface iRobot) {
 		super(iRobot);
@@ -34,45 +38,32 @@ public class CleverRobot extends IRobotAdapter implements Runnable {
 	/* This method is executed when the robot first starts up. */
 	private void initialize() throws IOException {
 		// what would you like me to do, Clever Human?
-		if(debug){
+		if (debug) {
 			System.out.println("Initializing...");
 		}
 	}
 
 	public void run() {
-		int leftSpeed = 500;
-		int rightSpeed = 500;
+
 		running = true;
 		while (running) {
 			try {
-				driveDirect(leftSpeed, rightSpeed);
-				Thread.sleep(20);
-				readSensors(SENSORS_BUMPS_AND_WHEEL_DROPS);
-				if (isBumpLeft() && isBumpRight()) {
-					// adjust the wheel speeds
-				}
-				if (isBumpLeft()) {
-					// adjust the wheel speeds
-				}
-				if (isBumpRight()) {
-					// adjust the wheel speeds
-				}
-				if (debug) {
-					System.out.println(String.format(
-							"Left bumber = %s, Right bumber = %s",
-							isBumpLeft(), isBumpRight()));
-					System.out.println(String.format(
-							"Left wheel speed = %d, Right wheel speed = %d",
-							leftSpeed, rightSpeed));
-				}
-				// ...
-				// if (/* goal reached */){
-				// running = false;
-				// }
-				
-				
 
+				readSensors(SENSORS_GROUP_ID106);
+				readSensors(SENSORS_BUMPS_AND_WHEEL_DROPS);
+				int[] lightBumps = getLightBumps();
+				// boolean l = isBumpLeft();
+				System.out.println("lightBumps: " + Arrays.toString(lightBumps));
+				System.out.println("isBumpRight = " + isBumpRight());
+				driveDirect(leftWheelSpeed, rightWheelSpeed);
+				if (lightBumps[5] > 4000) {
+					driveDirect(-15, 0);
+					Thread.sleep(500);
+				} else {
+					driveDirect(leftWheelSpeed, rightWheelSpeed);
+				}
 			} catch (IOException | InterruptedException e) {
+				System.out.println("Exception: " + e.getClass());
 				running = false;
 			}
 		}
